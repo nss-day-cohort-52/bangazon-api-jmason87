@@ -167,6 +167,7 @@ class ProductView(ViewSet):
         order = request.query_params.get('order_by', None)
         direction = request.query_params.get('direction', None)
         name = request.query_params.get('name', None)
+        min_price = request.query_params.get('min_price', None)
 
         if number_sold:
             products = products.annotate(
@@ -174,6 +175,9 @@ class ProductView(ViewSet):
                 # the __ between orders and payment is saying form orders, look at payment type
                 # the =~ is the same as !=
             ).filter(order_count__gte=number_sold)
+            
+        if min_price:
+            products = products.filter(price__gte=min_price)
 
         if order is not None:
             order_filter = f'-{order}' if direction == 'desc' else order
