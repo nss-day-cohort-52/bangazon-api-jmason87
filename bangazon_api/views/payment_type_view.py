@@ -7,6 +7,8 @@ from drf_yasg import openapi
 from bangazon_api.models import PaymentType
 from bangazon_api.serializers import (
     PaymentTypeSerializer, MessageSerializer, CreatePaymentType)
+from django.contrib.auth.models import User
+
 
 
 class PaymentTypeView(ViewSet):
@@ -18,9 +20,15 @@ class PaymentTypeView(ViewSet):
     })
     def list(self, request):
         """Get a list of payment types for the current user"""
-        payment_types = PaymentType.objects.all()
-        serializer = PaymentTypeSerializer(payment_types, many=True)
-        return Response(serializer.data)
+        try:
+            payment_types = PaymentType.objects.all()
+
+            payment_type = payment_types.filter(customer = request.auth.user)
+            serializer = PaymentTypeSerializer(payment_type, many=True)
+            return Response(serializer.data)
+        except PaymentType.DoesNotExist as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+       
 
     @swagger_auto_schema(
         request_body=CreatePaymentType,
