@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from django.core.management import call_command
 from django.contrib.auth.models import User
+from bangazon_api.models import payment_type
 
 
 class PaymentTests(APITestCase):
@@ -37,3 +38,22 @@ class PaymentTests(APITestCase):
         self.assertIsNotNone(response.data['id'])
         self.assertEqual(response.data["merchant_name"], data['merchant'])
         self.assertEqual(response.data["acct_number"], data['acctNumber'])
+
+    def test_delete_payment_type(self):
+        """
+        Ensure we can delete an existing game.
+        """
+        # Define the URL path for deleting an existing Game
+        url = f'/payment-types/{self.id}'
+
+        # Initiate DELETE request and capture the response
+        response = self.client.delete(url)
+
+        # Assert that the response status code is 204 (NO CONTENT)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        # Initiate GET request and capture the response
+        response = self.client.get(url)
+
+        # Assert that the response status code is 404 (NOT FOUND)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

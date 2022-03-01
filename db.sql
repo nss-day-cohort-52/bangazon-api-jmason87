@@ -1,3 +1,3 @@
 SELECT *
-FROM bangazon_api_orderproduct
-ORDER BY product_id ASC
+FROM bangazon_api_product
+ORDER BY price ASC
