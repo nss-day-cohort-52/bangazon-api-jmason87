@@ -1,1 +1,2 @@
 from .products.productsbyprice import ProductList
+from .products.inexpensiveproducts import InexpensiveProductList
