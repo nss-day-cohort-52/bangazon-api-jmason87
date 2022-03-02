@@ -27,12 +27,17 @@ class Product(models.Model):
             number -- The average rating for the product
         """
         # TODO: Fix Divide by zero error
-
+        
         total_rating = 0
         for rating in self.ratings.all():
             total_rating += rating.score
 
-        avg = total_rating / self.ratings.count()
+        if total_rating > 0:
+            avg = total_rating / self.ratings.count()
+            return avg
+        elif total_rating == 0:
+            avg = 0
+            return avg
         return avg
 
     @property
