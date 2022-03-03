@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q, Count
 from rest_framework.decorators import action
-from django.contrib.auth.models import User
 
 
 from drf_yasg.utils import swagger_auto_schema

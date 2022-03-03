@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from bangazon_api.helpers import STATE_NAMES
-from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation
+from bangazon_api.models import Product, Store, Category, Order, Rating, Recommendation, Like
 from bangazon_api.serializers import (
     ProductSerializer, CreateProductSerializer, MessageSerializer,
     AddProductRatingSerializer, AddRemoveRecommendationSerializer)
@@ -356,3 +356,29 @@ class ProductView(ViewSet):
             )
 
         return Response({'message': 'Rating added'}, status=status.HTTP_201_CREATED)
+    
+    @action(methods=['post'], detail=True)
+    def like(self, request, pk):
+        """ post for favoriting a store"""
+        try:
+            customer = request.auth.user.id
+            product = Product.objects.get(pk=pk)
+            likes = Like()
+            likes.customer_id = customer
+            likes.product_id = product.id
+            likes.save()        
+            return Response({'message': 'Product liked!'}, status=status.HTTP_201_CREATED)
+        except (Store.DoesNotExist) as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(methods=['delete'], detail=True)
+    def unlike(self, request, pk):
+        """ remove a store from favorites """
+        try:
+            like = Like.objects.get(product_id=pk, customer_id=request.auth.user.id)
+            like.delete()
+            return Response({'message': "Product unliked!"},
+                            status=status.HTTP_201_CREATED)
+        except (Store.DoesNotExist) as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)   
