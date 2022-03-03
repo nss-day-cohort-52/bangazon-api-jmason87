@@ -3,11 +3,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q, Count
+from rest_framework.decorators import action
+from django.contrib.auth.models import User
+
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from bangazon_api.models import Store
+from bangazon_api.models import Store, Favorite
 from bangazon_api.serializers import StoreSerializer, MessageSerializer, AddStoreSerializer
+
 
 
 class StoreView(ViewSet):
@@ -104,3 +108,30 @@ class StoreView(ViewSet):
             return Response({'message': ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
         except Store.DoesNotExist as ex:
             return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+    
+        
+    @action(methods=['post'], detail=True)
+    def favorite(self, request, pk):
+        """ post for favoriting a store"""
+        try:
+            customer = request.auth.user.id
+            store = Store.objects.get(pk=pk)
+            favorites = Favorite()
+            favorites.customer_id = customer
+            favorites.store_id = store.id
+            favorites.save()        
+            return Response({'message': 'Store added to favorites'}, status=status.HTTP_201_CREATED)
+        except (Store.DoesNotExist) as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(methods=['delete'], detail=True)
+    def unfavorite(self, request, pk):
+        """ remove a store from favorites """
+        try:
+            favorite = Favorite.objects.get(store_id=pk, customer_id=request.auth.user.id)
+            favorite.delete()
+            return Response({'message': "Store removed as favorite"},
+                            status=status.HTTP_201_CREATED)
+        except (Store.DoesNotExist) as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)          
