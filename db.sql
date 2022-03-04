@@ -1,3 +1,6 @@
+SELECT *
+FROM bangazon_api_product
+ORDER BY price ASC
 SELECT u.id as customer_id, u.first_name || " " || u.last_name as full_name, s.name as store_name
 FROM bangazon_api_favorite f
 JOIN auth_user u 

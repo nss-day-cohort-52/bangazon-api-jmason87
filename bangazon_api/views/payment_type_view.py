@@ -7,7 +7,7 @@ from drf_yasg import openapi
 from bangazon_api.models import PaymentType
 from bangazon_api.serializers import (
     PaymentTypeSerializer, MessageSerializer, CreatePaymentType)
-from django.contrib.auth.models import User
+
 
 
 
@@ -67,7 +67,7 @@ class PaymentTypeView(ViewSet):
             )
         }
     )
-    def delete(self, request, pk):
+    def destroy(self, request, pk):
         """Delete a payment type"""
         try:
             payment_type = PaymentType.objects.get(pk=pk)
