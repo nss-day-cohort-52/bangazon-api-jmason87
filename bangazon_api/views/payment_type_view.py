@@ -9,6 +9,8 @@ from bangazon_api.serializers import (
     PaymentTypeSerializer, MessageSerializer, CreatePaymentType)
 
 
+
+
 class PaymentTypeView(ViewSet):
     @swagger_auto_schema(responses={
         200: openapi.Response(
@@ -18,9 +20,15 @@ class PaymentTypeView(ViewSet):
     })
     def list(self, request):
         """Get a list of payment types for the current user"""
-        payment_types = PaymentType.objects.all()
-        serializer = PaymentTypeSerializer(payment_types, many=True)
-        return Response(serializer.data)
+        try:
+            payment_types = PaymentType.objects.all()
+
+            payment_type = payment_types.filter(customer = request.auth.user)
+            serializer = PaymentTypeSerializer(payment_type, many=True)
+            return Response(serializer.data)
+        except PaymentType.DoesNotExist as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+       
 
     @swagger_auto_schema(
         request_body=CreatePaymentType,
@@ -40,8 +48,8 @@ class PaymentTypeView(ViewSet):
         try:
             payment_type = PaymentType.objects.create(
                 customer=request.auth.user,
-                merchant_name=request.data['acctNumber'],
-                acct_number=request.data['merchant']
+                merchant_name=request.data['merchant'],
+                acct_number=request.data['acctNumber']
             )
             serializer = PaymentTypeSerializer(payment_type)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -59,7 +67,7 @@ class PaymentTypeView(ViewSet):
             )
         }
     )
-    def delete(self, request, pk):
+    def destroy(self, request, pk):
         """Delete a payment type"""
         try:
             payment_type = PaymentType.objects.get(pk=pk)
